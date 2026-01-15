@@ -9,26 +9,26 @@
 
 [English](README.md) | [中文](README.zh.md)
 
-Testmail WebViewer is a Material Design-based web application for visualizing emails from [Testmail.app](https://testmail.app/). It provides a modern, responsive interface for developers and testers to view and debug emails easily.
+Testmail WebViewer 是一个基于 Material Design 设计风格的 Web 应用程序，用于可视化展示来自 [Testmail.app](https://testmail.app/) 的邮件。它提供了一个现代、响应式的界面，方便开发者和测试人员查看和调试邮件。
 
 ![Testmail WebViewer Screenshot](https://placehold.co/800x400?text=Testmail+Viewer+Screenshot)
 
-## 📖 Usage Guide
+## 📖 使用指南
 
-1.  **Configure API**:
-    *   Enter your Testmail.app **API Key** in the configuration area at the top.
-    *   Enter your **Namespace**.
-    *   (Optional) Enter a **Tag** to filter specific emails.
+1.  **配置 API**：
+    *   在页面顶部的配置区域输入您的 Testmail.app **API Key**。
+    *   输入您的 **Namespace**。
+    *   (可选) 输入 **Tag** 以筛选特定标签的邮件。
 
-2.  **Fetch Emails**:
-    *   Click the "Fetch Emails" button or press Enter.
-    *   The email list will load and appear below.
+2.  **获取邮件**：
+    *   点击 "获取邮件" 按钮或按回车键。
+    *   邮件列表将加载并在下方显示。
 
-3.  **View Details**:
-    *   Click on any item in the email list to expand details.
-    *   In the detail view, you can switch between "HTML View" and "Plain Text".
-    *   Click the "Copy" button to copy email content to the clipboard.
+3.  **查看详情**：
+    *   点击邮件列表中的任意一项展开详情。
+    *   在详情页中，您可以切换 "HTML 视图" 和 "纯文本" 视图。
+    *   点击 "复制" 按钮可以将邮件内容复制到剪贴板。
 
-## 🤝 Contributing
+## 🤝 贡献
 
-Issues and Pull Requests are welcome to improve this project!
+欢迎提交 Issue 和 Pull Request 来改进这个项目！
