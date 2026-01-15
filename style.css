@@ -686,4 +686,18 @@ iframe {
     .info-card {
         grid-template-columns: 1fr;
     }
+
+    /* Allow text wrapping on mobile */
+    .subject-text, .preview-text {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .app-title h1 {
+        white-space: normal;
+        overflow-wrap: break-word;
+    }
 }
