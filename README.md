@@ -1,5 +1,12 @@
 # Testmail Viewer
 
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen?style=flat-square&logo=github)](https://mookechee.github.io/testmail-webviewer/)
+[![GitHub repo size](https://img.shields.io/github/repo-size/mookechee/testmail-webviewer?style=flat-square)](https://github.com/mookechee/testmail-webviewer)
+[![GitHub stars](https://img.shields.io/github/stars/mookechee/testmail-webviewer?style=flat-square)](https://github.com/mookechee/testmail-webviewer/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/mookechee/testmail-webviewer?style=flat-square)](https://github.com/mookechee/testmail-webviewer/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/mookechee/testmail-webviewer?style=flat-square)](https://github.com/mookechee/testmail-webviewer/issues)
+[![GitHub license](https://img.shields.io/github/license/mookechee/testmail-webviewer?style=flat-square)](https://github.com/mookechee/testmail-webviewer/blob/main/LICENSE)
+
 Testmail Viewer 是一个基于 Material Design 设计风格的 Web 应用程序，用于可视化展示来自 [Testmail.app](https://testmail.app/) 的邮件。它提供了一个现代、响应式的界面，方便开发者和测试人员查看和调试邮件。
 
 ![Testmail Viewer Screenshot](https://via.placeholder.com/800x400?text=Testmail+Viewer+Screenshot)
@@ -18,13 +25,14 @@ Testmail Viewer 是一个基于 Material Design 设计风格的 Web 应用程序
 
 ### 在线使用 (推荐)
 
-您可以直接访问托管在 GitHub Pages 上的版本（如果有的话，或者您可以自己部署）。
+您可以直接访问托管在 GitHub Pages 上的版本：
+👉 **[https://mookechee.github.io/testmail-webviewer/](https://mookechee.github.io/testmail-webviewer/)**
 
 ### 本地运行
 
 1.  克隆本仓库到本地：
     ```bash
-    git clone https://github.com/YOUR_USERNAME/testmail-webviewer.git
+    git clone https://github.com/mookechee/testmail-webviewer.git
     cd testmail-webviewer
     ```
 
