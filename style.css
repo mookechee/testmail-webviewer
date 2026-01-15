@@ -1,4 +1,4 @@
-/* Material Design 3 - Testmail Viewer */
+/* Material Design 3 - Testmail WebViewer */
 :root {
     --md-sys-color-primary: #3F51B5;
     --md-sys-color-on-primary: #FFFFFF;
@@ -12,10 +12,75 @@
     --md-sys-color-background: #F0F2F5;
     --md-sys-color-error: #B3261E;
     --md-sys-color-success: #2E7D32;
+    --md-sys-color-detail-bg: #FAFAFA;
+    --md-sys-color-card-bg: #FFFFFF;
+    --md-sys-color-card-border: #E0E0E0;
+    --md-sys-color-text-primary: #202124;
+    --md-sys-color-text-secondary: #3C4043;
+    --md-sys-color-text-tertiary: #555;
     --font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
     --elevation-1: 0px 1px 3px rgba(0, 0, 0, 0.08), 0px 1px 2px rgba(0, 0, 0, 0.12);
     --elevation-2: 0px 4px 6px -2px rgba(0, 0, 0, 0.05), 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
     --elevation-3: 0px 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --md-sys-color-primary: #7986CB;
+        --md-sys-color-on-primary: #FFFFFF;
+        --md-sys-color-primary-container: #303F9F;
+        --md-sys-color-on-primary-container: #C5CAE9;
+        --md-sys-color-surface: #1E1E1E;
+        --md-sys-color-on-surface: #E0E0E0;
+        --md-sys-color-surface-variant: #2D2D2D;
+        --md-sys-color-outline: #9E9E9E;
+        --md-sys-color-outline-variant: #424242;
+        --md-sys-color-background: #121212;
+        --md-sys-color-error: #CF6679;
+        --md-sys-color-success: #81C784;
+        --md-sys-color-detail-bg: #252525;
+        --md-sys-color-card-bg: #2D2D2D;
+        --md-sys-color-card-border: #424242;
+        --md-sys-color-text-primary: #E0E0E0;
+        --md-sys-color-text-secondary: #BDBDBD;
+        --md-sys-color-text-tertiary: #9E9E9E;
+        --elevation-1: 0px 1px 3px rgba(0, 0, 0, 0.3), 0px 1px 2px rgba(0, 0, 0, 0.4);
+        --elevation-2: 0px 4px 6px -2px rgba(0, 0, 0, 0.3), 0px 10px 15px -3px rgba(0, 0, 0, 0.4);
+        --elevation-3: 0px 10px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .app-bar {
+        background-color: #1a1a2e;
+    }
+
+    .btn-primary {
+        background: var(--md-sys-color-primary);
+    }
+
+    .btn-primary:hover {
+        background-color: #5C6BC0;
+    }
+
+    .email-summary:hover {
+        background-color: rgba(121, 134, 203, 0.08);
+    }
+
+    .email-summary:active {
+        background-color: rgba(121, 134, 203, 0.15);
+    }
+
+    .btn-text:hover {
+        background-color: rgba(121, 134, 203, 0.15);
+    }
+
+    #snackbar {
+        background-color: #424242;
+    }
+
+    iframe {
+        background: var(--md-sys-color-card-bg);
+    }
 }
 
 * {
@@ -287,7 +352,7 @@ body {
 .sender-name {
     font-weight: 600;
     font-size: 14px;
-    color: #202124;
+    color: var(--md-sys-color-text-primary);
 }
 
 .sender-email {
@@ -301,7 +366,7 @@ body {
 .subject-text {
     font-size: 14px;
     font-weight: 500;
-    color: #3C4043;
+    color: var(--md-sys-color-text-secondary);
     margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -357,7 +422,7 @@ body {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
-    background-color: #FAFAFA;
+    background-color: var(--md-sys-color-detail-bg);
 }
 
 .email-detail-inner {
@@ -365,8 +430,8 @@ body {
 }
 
 .info-card {
-    background: white;
-    border: 1px solid #E0E0E0;
+    background: var(--md-sys-color-card-bg);
+    border: 1px solid var(--md-sys-color-card-border);
     border-radius: 8px;
     padding: 16px 20px;
     margin: 16px 0;
@@ -405,7 +470,7 @@ body {
 
 .info-value {
     font-size: 13px;
-    color: #333;
+    color: var(--md-sys-color-text-secondary);
     word-break: break-word;
     overflow-wrap: break-word;
     line-height: 1.4;
@@ -472,9 +537,9 @@ body {
 }
 
 .iframe-wrapper {
-    background: white;
+    background: var(--md-sys-color-card-bg);
     border-radius: 8px;
-    border: 1px solid #E0E0E0;
+    border: 1px solid var(--md-sys-color-card-border);
     overflow: hidden;
 }
 
@@ -486,13 +551,13 @@ iframe {
 }
 
 .text-content {
-    background: white;
+    background: var(--md-sys-color-card-bg);
     border-radius: 8px;
-    border: 1px solid #E0E0E0;
+    border: 1px solid var(--md-sys-color-card-border);
     padding: 16px;
     font-size: 14px;
     line-height: 1.6;
-    color: #333;
+    color: var(--md-sys-color-text-secondary);
     white-space: pre-wrap;
     word-break: break-word;
     max-height: 400px;
@@ -503,7 +568,7 @@ iframe {
 .attachments-section {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid #E0E0E0;
+    border-top: 1px solid var(--md-sys-color-card-border);
 }
 
 .attachments-title {
@@ -523,7 +588,7 @@ iframe {
     margin-right: 8px;
     margin-bottom: 8px;
     font-size: 13px;
-    color: #555;
+    color: var(--md-sys-color-text-tertiary);
 }
 
 /* Loading */

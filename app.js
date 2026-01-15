@@ -1,5 +1,5 @@
 /**
- * Testmail Viewer - Material Design Email Visualization Tool
+ * Testmail WebViewer - Material Design Email Visualization Tool
  * Supports GitHub Pages Static Deployment
  * Internationalization (i18n) Support
  */
@@ -9,7 +9,7 @@ const API_BASE = 'https://api.testmail.app/api/json';
 // Translations
 const translations = {
     zh: {
-        appTitle: 'Testmail Viewer',
+        appTitle: 'Testmail WebViewer',
         subtitle: '邮件可视化工具',
         configTitle: 'API 配置',
         apiKeyLabel: 'API Key',
@@ -54,7 +54,7 @@ const translations = {
         copied: '已复制到剪贴板'
     },
     en: {
-        appTitle: 'Testmail Viewer',
+        appTitle: 'Testmail WebViewer',
         subtitle: 'Email Visualization Tool',
         configTitle: 'API Configuration',
         apiKeyLabel: 'API Key',
@@ -122,6 +122,7 @@ const langBtn = document.getElementById('langBtn');
 let emails = [];
 let activeEmailIndex = null;
 let currentLang = 'zh'; // Default language
+let isFetching = false; // Prevent duplicate requests
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -317,6 +318,9 @@ function getPreview(email) {
 
 // Fetch emails from API
 async function fetchEmails() {
+    // Prevent duplicate requests
+    if (isFetching) return;
+
     const apiKey = apiKeyInput.value.trim();
     const namespace = namespaceInput.value.trim();
     const tag = tagInput.value.trim();
@@ -326,6 +330,7 @@ async function fetchEmails() {
         return;
     }
 
+    isFetching = true;
     saveConfig();
     showLoading(true);
 
@@ -363,136 +368,20 @@ async function fetchEmails() {
         renderError(error.message);
     } finally {
         showLoading(false);
+        isFetching = false;
     }
 }
 
 // Update stats chips
 function updateStats(data) {
-    // If called without data (e.g. from updateLanguageUI), use emails array
-    // Note: data.count is total on server, emails.length is what we have loaded.
-    // Ideally we persist the 'data' object. For now, rely on emails.length for current.
-    
-    // We can't really restore 'data.count' or 'data.offset' without storing them.
-    // For this simple app, we will just re-render what we can. 
-    // If 'data' is passed (from fetch), use it.
-    
-    const count = data ? (data.count || 0) : 'N/A';
-    const offset = data ? data.offset : null;
-
-    let html = `
-        <div class="chip" data-i18n="subtitle">${t('subtitle')}</div>
-        <div class="chip">${t('total')}: ${count}</div>
-        <div class="chip">${t('current')}: ${emails.length}</div>
-    `;
-    
-    if (offset) {
-        html += `<div class="chip">${t('offset')}: ${offset}</div>`;
-    }
-
-    // Preserve the lang button which is also in this row in HTML structure but 
-    // actually, in HTML I moved langBtn to stats-row. 
-    // Wait, the stats-row innerHTML overwrite will kill the langBtn if it's inside statsRow!
-    // Let's check index.html again.
-    // I put <div class="stats-row"><div class="chip" id="statsRow">...</div> <button id="langBtn">...</div>
-    // Ah, wait. In index.html:
-    // <div class="stats-row">
-    //    <div class="chip" id="statsRow" data-i18n="subtitle">邮件可视化工具</div>
-    //    <button id="langBtn"...>
-    // </div>
-    //
-    // The previous code was: statsRowEl = document.getElementById('statsRow');
-    // And in JS: statsRowEl.innerHTML = ...
-    // This targets the specific chip DIV, not the container DIV.
-    // So modifying statsRowEl (the chip) is wrong if I want multiple chips.
-    //
-    // Let's look at my index.html change again.
-    // <div class="stats-row">
-    //     <div class="chip" id="statsRow" data-i18n="subtitle">邮件可视化工具</div>
-    //     <button id="langBtn" ...>
-    // </div>
-    //
-    // So 'statsRowEl' corresponds to the first chip.
-    // But fetchEmails calls updateStats which does:
-    // statsRowEl.innerHTML = `...multiple chips...`
-    // This means the first chip will contain multiple chips inside it. That breaks CSS likely.
-    
-    // Correction:
-    // In original HTML: <div class="stats-row" id="statsRow"> <div class="chip">...</div> </div>
-    // I changed it to: <div class="stats-row"> <div class="chip" id="statsRow">...</div> <button...> </div>
-    // This was a mistake in my thought process if I want to inject chips *next* to the button.
-    
-    // Let's adjust JS to target the parent container or handle the stats differently.
-    // Or, I can target the container and append the button.
-    // Easier fix: Use a specific container for stats inside the stats-row, and leave the button outside or next to it.
-    
-    // Current Index.html state (from my previous tool call):
-    // <div class="stats-row">
-    //     <div class="chip" id="statsRow" data-i18n="subtitle">邮件可视化工具</div>
-    //     <button id="langBtn" ...>
-    // </div>
-    
-    // JS updateStats overwrites 'statsRowEl' (id="statsRow").
-    // If I overwrite it, I lose 'data-i18n="subtitle"'.
-    // And if I put multiple chips inside a .chip, it looks nested.
-    
-    // I need to fix `updateStats` to play nice with the new HTML structure.
-    // Or assume `statsRowEl` is just one chip that acts as a status line?
-    // No, previous code generated multiple chips.
-    
-    // Solution:
-    // I will use `statsRowEl` to display the 'Subtitle' (default) OR the stats.
-    // When we fetch emails, we replace the subtitle chip with stats chips?
-    // Or better:
-    // The id="statsRow" should probably be on a container for stats, distinct from the static subtitle.
-    
-    // Let's assume for now I will overwrite the innerHTML of that first div.
-    // It will look like a chip containing other chips? No, that's bad CSS.
-    
-    // I'll dynamically change the DOM logic here in JS to fix this.
-    // I will grab the parent of statsRowEl (which is class="stats-row")
-    // And replace the content there, but keep the button.
-}
-
-// Redefining updateStats to be safe
-function updateStats(data) {
-    const parent = document.querySelector('.stats-row');
-    // Remove all chips except the lang button
-    // Actually, easier to just rebuild the stats part.
-    
-    // Let's assume I want:
-    // [Stats Chips] [Lang Button]
-    
-    // I'll modify the logic to find the container.
-    // Since I can't easily change HTML again without another tool call (I could, but let's try to be efficient),
-    // I will work with what I have.
-    // id="statsRow" is on the first .chip.
-    
-    // If I change the outerHTML of statsRowEl, I lose the reference.
-    
-    // Let's just update the textContent of statsRowEl if it's just one chip, 
-    // OR, if I want multiple chips as before, I should have a container.
-    
-    // Retrying the HTML structure plan in my head:
-    // Old: <div class="stats-row" id="statsRow">...</div>
-    // New: <div class="stats-row"> <div id="statsRow" class="chip">...</div> <button...> </button> </div>
-    
-    // The `statsRowEl` is the `div.chip`.
-    // If I set `statsRowEl.outerHTML` to a string of multiple divs, I replace the single chip with multiple.
-    // But I need to re-acquire the reference for future updates? 
-    // Or just wrap stats in a span/div in the HTML next time.
-    
-    // Alternative: Just show text in that one chip. "Total: 5 | Current: 5"
-    // This is safer and cleaner for now without changing HTML structure again.
-    
     const count = data ? (data.count || 0) : 0;
     const offset = data ? data.offset : '';
-    
+
     let text = `${t('total')}: ${count} · ${t('current')}: ${emails.length}`;
     if (offset) text += ` · ${t('offset')}: ${offset}`;
-    
+
     statsRowEl.textContent = text;
-    // Remove data-i18n so it doesn't get overwritten on lang switch back to "Email Visualization Tool"
-    // ONLY if we have data.
+    // Remove data-i18n so it doesn't get overwritten on lang switch
     if (data) {
         statsRowEl.removeAttribute('data-i18n');
     }
