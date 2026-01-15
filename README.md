@@ -9,7 +9,7 @@
 
 Testmail Viewer 是一个基于 Material Design 设计风格的 Web 应用程序，用于可视化展示来自 [Testmail.app](https://testmail.app/) 的邮件。它提供了一个现代、响应式的界面，方便开发者和测试人员查看和调试邮件。
 
-![Testmail Viewer Screenshot](https://via.placeholder.com/800x400?text=Testmail+Viewer+Screenshot)
+![Testmail Viewer Screenshot](https://placehold.co/800x400?text=Testmail+Viewer+Screenshot)
 
 ## ✨ 功能特点
 
