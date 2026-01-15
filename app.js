@@ -1,48 +1,96 @@
-// Testmail Viewer - 邮件可视化工具
+/**
+ * Testmail Viewer - Material Design 邮件可视化工具
+ * 适配 GitHub Pages 静态部署
+ */
 
 const API_BASE = 'https://api.testmail.app/api/json';
 
-// DOM 元素
+// SVG Icons
+const icons = {
+    chevron: '<svg viewBox="0 0 24 24" class="chevron"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>',
+    copy: '<svg viewBox="0 0 24 24" class="icon-sm"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>',
+    attachment: '<svg viewBox="0 0 24 24" class="icon-sm"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>'
+};
+
+// DOM Elements
 const apiKeyInput = document.getElementById('apiKey');
 const namespaceInput = document.getElementById('namespace');
 const tagInput = document.getElementById('tag');
 const fetchBtn = document.getElementById('fetchBtn');
-const mailListEl = document.getElementById('mailList');
-const mailDetailEl = document.getElementById('mailDetail');
-const mailCountEl = document.getElementById('mailCount');
+const emailListEl = document.getElementById('emailList');
+const statsRowEl = document.getElementById('statsRow');
 const loadingEl = document.getElementById('loading');
+const snackbarEl = document.getElementById('snackbar');
 
-// 状态
+// State
 let emails = [];
-let selectedEmail = null;
+let activeEmailIndex = null;
 
-// 从 localStorage 加载配置
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadConfig();
+    bindEvents();
+});
+
+// Load config from localStorage
 function loadConfig() {
-    const config = localStorage.getItem('testmail-config');
-    if (config) {
-        const { apiKey, namespace, tag } = JSON.parse(config);
-        apiKeyInput.value = apiKey || '';
-        namespaceInput.value = namespace || '';
-        tagInput.value = tag || '';
+    try {
+        const config = localStorage.getItem('testmail-viewer-config');
+        if (config) {
+            const { apiKey, namespace, tag } = JSON.parse(config);
+            if (apiKey) apiKeyInput.value = apiKey;
+            if (namespace) namespaceInput.value = namespace;
+            if (tag) tagInput.value = tag;
+        }
+    } catch (e) {
+        console.warn('Failed to load config:', e);
     }
 }
 
-// 保存配置到 localStorage
+// Save config to localStorage
 function saveConfig() {
-    const config = {
-        apiKey: apiKeyInput.value,
-        namespace: namespaceInput.value,
-        tag: tagInput.value
-    };
-    localStorage.setItem('testmail-config', JSON.stringify(config));
+    try {
+        const config = {
+            apiKey: apiKeyInput.value.trim(),
+            namespace: namespaceInput.value.trim(),
+            tag: tagInput.value.trim()
+        };
+        localStorage.setItem('testmail-viewer-config', JSON.stringify(config));
+    } catch (e) {
+        console.warn('Failed to save config:', e);
+    }
 }
 
-// 显示/隐藏加载动画
+// Bind events
+function bindEvents() {
+    fetchBtn.addEventListener('click', fetchEmails);
+
+    // Enter key triggers fetch
+    [apiKeyInput, namespaceInput, tagInput].forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchEmails();
+        });
+    });
+}
+
+// Show/hide loading
 function showLoading(show) {
     loadingEl.classList.toggle('hidden', !show);
 }
 
-// 格式化日期
+// Show snackbar notification
+function showSnackbar(message, type = 'default') {
+    snackbarEl.textContent = message;
+    snackbarEl.className = 'show';
+    if (type === 'error') snackbarEl.classList.add('error');
+    if (type === 'success') snackbarEl.classList.add('success');
+
+    setTimeout(() => {
+        snackbarEl.className = '';
+    }, 3000);
+}
+
+// Format date
 function formatDate(timestamp) {
     const date = new Date(timestamp);
     const now = new Date();
@@ -57,7 +105,6 @@ function formatDate(timestamp) {
     if (diffDays < 7) return `${diffDays} 天前`;
 
     return date.toLocaleDateString('zh-CN', {
-        year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
@@ -65,14 +112,66 @@ function formatDate(timestamp) {
     });
 }
 
-// 获取邮件列表
+// Format file size
+function formatFileSize(bytes) {
+    if (!bytes) return '未知';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// Escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Get avatar letter from email/name
+function getAvatarLetter(from) {
+    if (!from) return '?';
+    const name = from.split('<')[0].replace(/["']/g, '').trim();
+    if (name) {
+        // Check if first char is Chinese
+        if (/[\u4e00-\u9fa5]/.test(name[0])) {
+            return name[0];
+        }
+        return name[0].toUpperCase();
+    }
+    return '?';
+}
+
+// Extract sender info
+function getSenderInfo(from) {
+    if (!from) return { name: '未知发件人', email: '' };
+
+    const match = from.match(/^(.+?)\s*<(.+)>$/);
+    if (match) {
+        return {
+            name: match[1].replace(/["']/g, '').trim() || match[2],
+            email: match[2]
+        };
+    }
+    return { name: from, email: from };
+}
+
+// Get text preview
+function getPreview(email) {
+    if (email.text) {
+        return email.text.substring(0, 100).replace(/\s+/g, ' ').trim();
+    }
+    return '(无预览)';
+}
+
+// Fetch emails from API
 async function fetchEmails() {
     const apiKey = apiKeyInput.value.trim();
     const namespace = namespaceInput.value.trim();
     const tag = tagInput.value.trim();
 
     if (!apiKey || !namespace) {
-        alert('请填写 API Key 和 Namespace');
+        showSnackbar('请填写 API Key 和 Namespace', 'error');
         return;
     }
 
@@ -81,7 +180,6 @@ async function fetchEmails() {
 
     try {
         let url = `${API_BASE}?apikey=${encodeURIComponent(apiKey)}&namespace=${encodeURIComponent(namespace)}`;
-
         if (tag) {
             url += `&tag=${encodeURIComponent(tag)}`;
         }
@@ -89,103 +187,189 @@ async function fetchEmails() {
         const response = await fetch(url);
         const data = await response.json();
 
-        if (data.error) {
+        if (data.result !== 'success') {
             throw new Error(data.message || '获取邮件失败');
         }
 
-        emails = data.emails || [];
-        renderMailList();
+        emails = Array.isArray(data.emails) ? data.emails : [];
+        activeEmailIndex = null;
 
-        // 自动选中第一封邮件
-        if (emails.length > 0) {
-            selectEmail(emails[0]);
+        // Update stats
+        updateStats(data);
+
+        // Render email list
+        renderEmailList();
+
+        if (emails.length === 0) {
+            showSnackbar('没有找到邮件', 'default');
         } else {
-            mailDetailEl.innerHTML = '<p class="placeholder">没有找到邮件</p>';
+            showSnackbar(`成功获取 ${emails.length} 封邮件`, 'success');
         }
+
     } catch (error) {
-        mailListEl.innerHTML = `<div class="error-msg">错误: ${error.message}</div>`;
-        mailDetailEl.innerHTML = '<p class="placeholder">获取邮件失败</p>';
+        console.error('Fetch error:', error);
+        showSnackbar(error.message || '请求失败，请检查网络', 'error');
+        renderError(error.message);
     } finally {
         showLoading(false);
     }
 }
 
-// 渲染邮件列表
-function renderMailList() {
-    mailCountEl.textContent = emails.length;
+// Update stats chips
+function updateStats(data) {
+    statsRowEl.innerHTML = `
+        <div class="chip">总数: ${data.count || 0}</div>
+        <div class="chip">当前: ${emails.length}</div>
+        ${data.offset ? `<div class="chip">Offset: ${data.offset}</div>` : ''}
+    `;
+}
 
+// Render error state
+function renderError(message) {
+    emailListEl.innerHTML = `
+        <div class="error-state">
+            <p>错误: ${escapeHtml(message)}</p>
+        </div>
+    `;
+}
+
+// Render email list
+function renderEmailList() {
     if (emails.length === 0) {
-        mailListEl.innerHTML = '<p class="placeholder">没有找到邮件</p>';
+        emailListEl.innerHTML = `
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" class="empty-icon">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+                <p>没有找到邮件</p>
+            </div>
+        `;
         return;
     }
 
-    mailListEl.innerHTML = emails.map((email, index) => `
-        <div class="mail-item ${selectedEmail && selectedEmail.id === email.id ? 'active' : ''}"
-             data-index="${index}">
-            <div class="from">${escapeHtml(email.from || '未知发件人')}</div>
-            <div class="subject">${escapeHtml(email.subject || '(无主题)')}</div>
-            <div class="meta">
-                <span class="time">${formatDate(email.timestamp)}</span>
-                ${email.tag ? `<span class="tag">${escapeHtml(email.tag)}</span>` : ''}
+    emailListEl.innerHTML = emails.map((email, index) => {
+        const sender = getSenderInfo(email.from);
+        const preview = getPreview(email);
+        const isActive = activeEmailIndex === index;
+
+        return `
+            <div class="email-item ${isActive ? 'active' : ''}" data-index="${index}">
+                <div class="email-summary" onclick="toggleEmail(${index})">
+                    <div class="avatar">${escapeHtml(getAvatarLetter(email.from))}</div>
+                    <div class="content-col">
+                        <div class="sender-row">
+                            <span class="sender-name">${escapeHtml(sender.name)}</span>
+                            <span class="sender-email">&lt;${escapeHtml(sender.email)}&gt;</span>
+                        </div>
+                        <div class="subject-text">${escapeHtml(email.subject || '(无主题)')}</div>
+                        <div class="preview-text">${escapeHtml(preview)}</div>
+                    </div>
+                    <div class="meta-col">
+                        <span class="date-badge">${formatDate(email.timestamp)}</span>
+                        ${email.tag ? `<span class="tag-badge">${escapeHtml(email.tag)}</span>` : ''}
+                        ${icons.chevron}
+                    </div>
+                </div>
+                <div class="email-detail-container" id="detail-${index}">
+                    <div class="email-detail-inner">
+                        ${renderEmailDetail(email, index)}
+                    </div>
+                </div>
             </div>
-        </div>
-    `).join('');
-
-    // 绑定点击事件
-    mailListEl.querySelectorAll('.mail-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const index = parseInt(item.dataset.index);
-            selectEmail(emails[index]);
-        });
-    });
+        `;
+    }).join('');
 }
 
-// 选中邮件
-function selectEmail(email) {
-    selectedEmail = email;
-    renderMailList();
-    renderMailDetail(email);
-}
-
-// 渲染邮件详情
-function renderMailDetail(email) {
+// Render email detail content
+function renderEmailDetail(email, index) {
+    const sender = getSenderInfo(email.from);
     const hasHtml = email.html && email.html.trim();
     const hasText = email.text && email.text.trim();
     const hasAttachments = email.attachments && email.attachments.length > 0;
 
-    let tabsHtml = '';
+    // Info card
+    let html = `
+        <div class="info-card">
+            <div class="info-item">
+                <span class="info-label">发件人</span>
+                <span class="info-value">${escapeHtml(email.from || '未知')}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">收件人</span>
+                <span class="info-value">${escapeHtml(email.to || '未知')}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">时间</span>
+                <span class="info-value">${new Date(email.timestamp).toLocaleString('zh-CN')}</span>
+            </div>
+            ${email.tag ? `
+            <div class="info-item">
+                <span class="info-label">标签</span>
+                <span class="info-value">${escapeHtml(email.tag)}</span>
+            </div>
+            ` : ''}
+        </div>
+    `;
+
+    // Action bar
+    html += `
+        <div class="action-bar">
+            <button class="btn-text" onclick="copyEmailContent(${index}, 'text')">
+                ${icons.copy}
+                复制文本
+            </button>
+            ${hasHtml ? `
+            <button class="btn-text" onclick="copyEmailContent(${index}, 'html')">
+                ${icons.copy}
+                复制HTML
+            </button>
+            ` : ''}
+        </div>
+    `;
+
+    // Tabs (if both HTML and text exist)
     if (hasHtml && hasText) {
-        tabsHtml = `
+        html += `
             <div class="tabs">
-                <button class="tab-btn active" data-tab="html">HTML</button>
-                <button class="tab-btn" data-tab="text">纯文本</button>
+                <button class="tab-btn active" onclick="switchTab(${index}, 'html')">HTML 视图</button>
+                <button class="tab-btn" onclick="switchTab(${index}, 'text')">纯文本</button>
             </div>
         `;
     }
 
-    let bodyHtml = '';
+    // Content
     if (hasHtml) {
-        bodyHtml = `
-            <div class="detail-body html-content" id="htmlBody">
-                <iframe id="emailFrame" sandbox="allow-same-origin"></iframe>
+        html += `
+            <div class="iframe-wrapper" id="html-view-${index}">
+                <iframe id="iframe-${index}" sandbox="allow-same-origin"></iframe>
             </div>
-            ${hasText ? `<div class="detail-body text-content" id="textBody" style="display:none;"><pre>${escapeHtml(email.text)}</pre></div>` : ''}
         `;
+        if (hasText) {
+            html += `
+                <div class="text-content" id="text-view-${index}" style="display: none;">
+                    ${escapeHtml(email.text)}
+                </div>
+            `;
+        }
     } else if (hasText) {
-        bodyHtml = `<div class="detail-body"><pre>${escapeHtml(email.text)}</pre></div>`;
+        html += `
+            <div class="text-content">
+                ${escapeHtml(email.text)}
+            </div>
+        `;
     } else {
-        bodyHtml = '<div class="detail-body"><p class="placeholder">邮件没有内容</p></div>';
+        html += `<div class="empty-state"><p>邮件没有内容</p></div>`;
     }
 
-    let attachmentsHtml = '';
+    // Attachments
     if (hasAttachments) {
-        attachmentsHtml = `
-            <div class="detail-attachments">
-                <h3>附件 (${email.attachments.length})</h3>
+        html += `
+            <div class="attachments-section">
+                <div class="attachments-title">附件 (${email.attachments.length})</div>
                 ${email.attachments.map(att => `
                     <div class="attachment-item">
-                        <span>📎</span>
-                        <span>${escapeHtml(att.filename || '未命名附件')}</span>
+                        ${icons.attachment}
+                        <span>${escapeHtml(att.filename || '未命名')}</span>
                         <span>(${formatFileSize(att.size)})</span>
                     </div>
                 `).join('')}
@@ -193,91 +377,103 @@ function renderMailDetail(email) {
         `;
     }
 
-    mailDetailEl.innerHTML = `
-        <div class="detail-header">
-            <div class="subject">${escapeHtml(email.subject || '(无主题)')}</div>
-            <div class="meta-row">
-                <span class="meta-label">发件人</span>
-                <span class="meta-value">${escapeHtml(email.from || '未知')}</span>
-            </div>
-            <div class="meta-row">
-                <span class="meta-label">收件人</span>
-                <span class="meta-value">${escapeHtml(email.to || '未知')}</span>
-            </div>
-            <div class="meta-row">
-                <span class="meta-label">时间</span>
-                <span class="meta-value">${new Date(email.timestamp).toLocaleString('zh-CN')}</span>
-            </div>
-            ${email.tag ? `
-            <div class="meta-row">
-                <span class="meta-label">标签</span>
-                <span class="meta-value"><span class="tag">${escapeHtml(email.tag)}</span></span>
-            </div>
-            ` : ''}
-        </div>
-        ${tabsHtml}
-        ${bodyHtml}
-        ${attachmentsHtml}
-    `;
+    return html;
+}
 
-    // 设置 HTML 内容到 iframe
-    if (hasHtml) {
-        const iframe = document.getElementById('emailFrame');
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        doc.open();
-        doc.write(email.html);
-        doc.close();
+// Toggle email expand/collapse
+function toggleEmail(index) {
+    const items = document.querySelectorAll('.email-item');
+    const detailContainer = document.getElementById(`detail-${index}`);
+    const item = items[index];
 
-        // 自动调整 iframe 高度
-        setTimeout(() => {
-            try {
-                iframe.style.height = Math.max(400, doc.body.scrollHeight + 40) + 'px';
-            } catch (e) {}
-        }, 100);
-    }
+    if (activeEmailIndex === index) {
+        // Collapse
+        item.classList.remove('active');
+        detailContainer.style.maxHeight = '0';
+        activeEmailIndex = null;
+    } else {
+        // Collapse previous
+        if (activeEmailIndex !== null) {
+            items[activeEmailIndex].classList.remove('active');
+            document.getElementById(`detail-${activeEmailIndex}`).style.maxHeight = '0';
+        }
 
-    // 绑定 tab 切换
-    if (hasHtml && hasText) {
-        mailDetailEl.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tab = btn.dataset.tab;
-                mailDetailEl.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+        // Expand current
+        item.classList.add('active');
+        detailContainer.style.maxHeight = detailContainer.scrollHeight + 500 + 'px';
+        activeEmailIndex = index;
 
-                document.getElementById('htmlBody').style.display = tab === 'html' ? 'block' : 'none';
-                document.getElementById('textBody').style.display = tab === 'text' ? 'block' : 'none';
-            });
-        });
+        // Load iframe content
+        const email = emails[index];
+        if (email.html) {
+            setTimeout(() => {
+                const iframe = document.getElementById(`iframe-${index}`);
+                if (iframe) {
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    doc.open();
+                    doc.write(email.html);
+                    doc.close();
+
+                    // Auto adjust iframe height
+                    setTimeout(() => {
+                        try {
+                            const height = Math.max(350, doc.body.scrollHeight + 40);
+                            iframe.style.height = height + 'px';
+                        } catch (e) {}
+                    }, 100);
+                }
+            }, 50);
+        }
     }
 }
 
-// HTML 转义
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+// Switch tab between HTML and text view
+function switchTab(index, tab) {
+    const htmlView = document.getElementById(`html-view-${index}`);
+    const textView = document.getElementById(`text-view-${index}`);
+    const detailContainer = document.getElementById(`detail-${index}`);
+    const tabs = detailContainer.querySelectorAll('.tab-btn');
 
-// 格式化文件大小
-function formatFileSize(bytes) {
-    if (!bytes) return '未知大小';
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
-
-// 初始化
-document.addEventListener('DOMContentLoaded', () => {
-    loadConfig();
-    fetchBtn.addEventListener('click', fetchEmails);
-
-    // 回车触发获取
-    [apiKeyInput, namespaceInput, tagInput].forEach(input => {
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                fetchEmails();
-            }
-        });
+    tabs.forEach((t, i) => {
+        t.classList.toggle('active', (tab === 'html' && i === 0) || (tab === 'text' && i === 1));
     });
-});
+
+    if (htmlView) htmlView.style.display = tab === 'html' ? 'block' : 'none';
+    if (textView) textView.style.display = tab === 'text' ? 'block' : 'none';
+}
+
+// Copy email content to clipboard
+async function copyEmailContent(index, type) {
+    const email = emails[index];
+    let content = '';
+
+    if (type === 'html' && email.html) {
+        content = email.html;
+    } else if (email.text) {
+        content = email.text;
+    } else {
+        showSnackbar('没有可复制的内容', 'error');
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(content);
+        showSnackbar('已复制到剪贴板', 'success');
+    } catch (e) {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = content;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showSnackbar('已复制到剪贴板', 'success');
+    }
+}
+
+// Make functions globally accessible
+window.toggleEmail = toggleEmail;
+window.switchTab = switchTab;
+window.copyEmailContent = copyEmailContent;
