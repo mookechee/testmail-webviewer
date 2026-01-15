@@ -1,4 +1,4 @@
-# Testmail Viewer
+# Testmail WebViewer
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen?style=flat-square&logo=github)](https://mookechee.github.io/testmail-webviewer/)
 [![GitHub repo size](https://img.shields.io/github/repo-size/mookechee/testmail-webviewer?style=flat-square)](https://github.com/mookechee/testmail-webviewer)
@@ -9,9 +9,9 @@
 
 [中文](README.md) | [English](README.en.md)
 
-Testmail Viewer is a Material Design-based web application for visualizing emails from [Testmail.app](https://testmail.app/). It provides a modern, responsive interface for developers and testers to view and debug emails easily.
+Testmail WebViewer is a Material Design-based web application for visualizing emails from [Testmail.app](https://testmail.app/). It provides a modern, responsive interface for developers and testers to view and debug emails easily.
 
-![Testmail Viewer Screenshot](https://placehold.co/800x400?text=Testmail+Viewer+Screenshot)
+![Testmail WebViewer Screenshot](https://placehold.co/800x400?text=Testmail+Viewer+Screenshot)
 
 ## ✨ Features
 

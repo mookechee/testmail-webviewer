@@ -142,7 +142,7 @@ function t(key, params = {}) {
 // Load config from localStorage
 function loadConfig() {
     try {
-        const config = localStorage.getItem('testmail-viewer-config');
+        const config = localStorage.getItem('testmail-webviewer-config');
         if (config) {
             const { apiKey, namespace, tag, lang } = JSON.parse(config);
             if (apiKey) apiKeyInput.value = apiKey;
@@ -164,7 +164,7 @@ function saveConfig() {
             tag: tagInput.value.trim(),
             lang: currentLang
         };
-        localStorage.setItem('testmail-viewer-config', JSON.stringify(config));
+        localStorage.setItem('testmail-webviewer-config', JSON.stringify(config));
     } catch (e) {
         console.warn('Failed to save config:', e);
     }
