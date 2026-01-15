@@ -34,12 +34,25 @@ body {
 
 /* Main Container */
 .main-container {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     background: var(--md-sys-color-surface);
     border-radius: 16px;
     box-shadow: var(--elevation-2);
     overflow: hidden;
+}
+
+/* 宽屏适配 */
+@media (min-width: 1400px) {
+    .main-container {
+        max-width: 1400px;
+    }
+}
+
+@media (min-width: 1800px) {
+    .main-container {
+        max-width: 1600px;
+    }
 }
 
 /* App Bar */
@@ -355,11 +368,21 @@ body {
     background: white;
     border: 1px solid #E0E0E0;
     border-radius: 8px;
-    padding: 16px;
+    padding: 16px 20px;
     margin: 16px 0;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px 24px;
+    gap: 14px 32px;
+}
+
+@media (min-width: 900px) {
+    .info-card {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .info-item.full-width {
+        grid-column: span 2;
+    }
 }
 
 .info-item {
