@@ -290,11 +290,11 @@ function renderEmailDetail(email, index) {
     // Info card
     let html = `
         <div class="info-card">
-            <div class="info-item">
+            <div class="info-item full-width">
                 <span class="info-label">发件人</span>
                 <span class="info-value">${escapeHtml(email.from || '未知')}</span>
             </div>
-            <div class="info-item">
+            <div class="info-item full-width">
                 <span class="info-label">收件人</span>
                 <span class="info-value">${escapeHtml(email.to || '未知')}</span>
             </div>

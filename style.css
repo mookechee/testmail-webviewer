@@ -358,27 +358,34 @@ body {
     padding: 16px;
     margin: 16px 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 24px;
 }
 
 .info-item {
     display: flex;
     flex-direction: column;
+    min-width: 0;
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
 }
 
 .info-label {
     font-size: 11px;
     text-transform: uppercase;
     color: var(--md-sys-color-outline);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     font-weight: 500;
 }
 
 .info-value {
     font-size: 13px;
     color: #333;
-    word-break: break-all;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
 }
 
 .action-bar {
