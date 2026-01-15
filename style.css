@@ -145,8 +145,29 @@ body {
 
 .stats-row {
     display: flex;
+    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.github-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.github-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.icon-github {
+    width: 22px;
+    height: 22px;
+    fill: var(--md-sys-color-on-primary);
 }
 
 .chip {
