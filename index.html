@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testmail Viewer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Testmail Viewer</h1>
+            <p class="subtitle">邮件可视化工具</p>
+        </header>
+
+        <section class="config-section">
+            <h2>API 配置</h2>
+            <div class="config-form">
+                <div class="form-group">
+                    <label for="apiKey">API Key</label>
+                    <input type="text" id="apiKey" placeholder="输入你的 Testmail API Key">
+                </div>
+                <div class="form-group">
+                    <label for="namespace">Namespace</label>
+                    <input type="text" id="namespace" placeholder="输入你的 Namespace">
+                </div>
+                <div class="form-group">
+                    <label for="tag">Tag (可选)</label>
+                    <input type="text" id="tag" placeholder="筛选特定标签的邮件">
+                </div>
+                <button id="fetchBtn" class="btn-primary">获取邮件</button>
+            </div>
+        </section>
+
+        <section class="mail-section">
+            <div class="mail-list">
+                <h2>邮件列表 <span id="mailCount" class="mail-count"></span></h2>
+                <div id="mailList" class="mail-items">
+                    <p class="placeholder">请先配置 API 并获取邮件</p>
+                </div>
+            </div>
+            <div class="mail-detail">
+                <h2>邮件详情</h2>
+                <div id="mailDetail" class="detail-content">
+                    <p class="placeholder">选择一封邮件查看详情</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>加载中...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
