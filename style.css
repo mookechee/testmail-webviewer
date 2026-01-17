@@ -150,6 +150,7 @@ body {
     flex-wrap: wrap;
 }
 
+.help-link,
 .github-link {
     display: flex;
     align-items: center;
@@ -158,12 +159,15 @@ body {
     height: 32px;
     border-radius: 50%;
     transition: background-color 0.2s ease;
+    cursor: pointer;
 }
 
+.help-link:hover,
 .github-link:hover {
     background-color: rgba(255, 255, 255, 0.15);
 }
 
+.icon-help,
 .icon-github {
     width: 22px;
     height: 22px;

@@ -51,7 +51,8 @@ const translations = {
         attachments: '附件',
         unnamed: '未命名',
         noContentCopy: '没有可复制的内容',
-        copied: '已复制到剪贴板'
+        copied: '已复制到剪贴板',
+        helpTooltip: '查看使用帮助'
     },
     en: {
         appTitle: 'Testmail WebViewer',
@@ -96,7 +97,8 @@ const translations = {
         attachments: 'Attachments',
         unnamed: 'Unnamed',
         noContentCopy: 'No content to copy',
-        copied: 'Copied to clipboard'
+        copied: 'Copied to clipboard',
+        helpTooltip: 'View Help Guide'
     }
 };
 
@@ -117,6 +119,13 @@ const statsRowEl = document.getElementById('statsRow');
 const loadingEl = document.getElementById('loading');
 const snackbarEl = document.getElementById('snackbar');
 const langBtn = document.getElementById('langBtn');
+const helpLink = document.getElementById('helpLink');
+
+// Help link URLs for different languages
+const helpUrls = {
+    zh: 'https://github.com/mookechee/testmail-webviewer/blob/main/README.zh.md#-使用指南',
+    en: 'https://github.com/mookechee/testmail-webviewer/blob/main/README.md#-usage-guide'
+};
 
 // State
 let emails = [];
@@ -191,6 +200,19 @@ function updateLanguageUI() {
             el.placeholder = translations[currentLang][key];
         }
     });
+
+    // Update title attributes
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (translations[currentLang][key]) {
+            el.title = translations[currentLang][key];
+        }
+    });
+
+    // Update help link URL based on language
+    if (helpLink && helpUrls[currentLang]) {
+        helpLink.href = helpUrls[currentLang];
+    }
 
     // Re-render email list if exists
     if (emails.length > 0) {
