@@ -1,0 +1,8 @@
+# robots.txt for Testmail WebViewer
+# https://mookechee.github.io/testmail-webviewer/
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://mookechee.github.io/testmail-webviewer/sitemap.xml

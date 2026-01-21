@@ -1,0 +1,23 @@
+{
+  "name": "Testmail WebViewer",
+  "short_name": "WebViewer",
+  "description": "A Material Design web application for visualizing emails from Testmail.app",
+  "start_url": "/testmail-webviewer/",
+  "display": "standalone",
+  "background_color": "#3F51B5",
+  "theme_color": "#3F51B5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["developer-tools", "productivity"],
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "scope": "/testmail-webviewer/",
+  "prefer_related_applications": false
+}
