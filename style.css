@@ -565,7 +565,8 @@ body {
     background: var(--md-sys-color-card-bg);
     border-radius: 8px;
     border: 1px solid var(--md-sys-color-card-border);
-    overflow: hidden;
+    overflow: auto;
+    max-height: 600px;
 }
 
 iframe {
@@ -585,7 +586,7 @@ iframe {
     color: var(--md-sys-color-text-secondary);
     white-space: pre-wrap;
     word-break: break-word;
-    max-height: 400px;
+    max-height: 600px;
     overflow-y: auto;
 }
 
