@@ -20,6 +20,7 @@ const translations = {
         tagPlaceholder: '筛选特定标签',
         fetchBtn: '获取邮件',
         emptyState: '请先配置 API 并获取邮件',
+        emptyHint: '在上方填写 API Key 和 Namespace 后点击获取',
         loading: '加载中...',
         justNow: '刚刚',
         minsAgo: '分钟前',
@@ -31,6 +32,7 @@ const translations = {
         errorMissingConfig: '请填写 API Key 和 Namespace',
         errorFetch: '获取邮件失败',
         noEmailsFound: '没有找到邮件',
+        noEmailsHint: '尝试更换 Tag 或检查 Namespace',
         successFetch: '成功获取 {n} 封邮件',
         networkError: '请求失败，请检查网络',
         total: '总数',
@@ -66,6 +68,7 @@ const translations = {
         tagPlaceholder: 'Filter by specific tag',
         fetchBtn: 'Fetch Emails',
         emptyState: 'Please configure API and fetch emails',
+        emptyHint: 'Fill in API Key and Namespace above, then click Fetch',
         loading: 'Loading...',
         justNow: 'Just now',
         minsAgo: 'mins ago',
@@ -77,6 +80,7 @@ const translations = {
         errorMissingConfig: 'Please enter API Key and Namespace',
         errorFetch: 'Failed to fetch emails',
         noEmailsFound: 'No emails found',
+        noEmailsHint: 'Try a different Tag or check Namespace',
         successFetch: 'Successfully fetched {n} emails',
         networkError: 'Request failed, check network',
         total: 'Total',
@@ -132,6 +136,7 @@ let emails = [];
 let activeEmailIndex = null;
 let currentLang = 'zh'; // Default language
 let isFetching = false; // Prevent duplicate requests
+let hasFetched = false; // Track if user has fetched at least once
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -338,6 +343,29 @@ function getPreview(email) {
     return t('noPreview');
 }
 
+// Render skeleton loading screen
+function renderSkeleton() {
+    const skeletonCount = 4;
+    let html = '<div class="skeleton-list">';
+    for (let i = 0; i < skeletonCount; i++) {
+        html += `
+            <div class="skeleton-item" style="animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1) ${i * 0.08}s both;">
+                <div class="skeleton-avatar shimmer"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-line short shimmer"></div>
+                    <div class="skeleton-line medium shimmer"></div>
+                    <div class="skeleton-line long shimmer"></div>
+                </div>
+                <div class="skeleton-meta">
+                    <div class="skeleton-badge shimmer"></div>
+                </div>
+            </div>
+        `;
+    }
+    html += '</div>';
+    emailListEl.innerHTML = html;
+}
+
 // Fetch emails from API
 async function fetchEmails() {
     // Prevent duplicate requests
@@ -353,8 +381,9 @@ async function fetchEmails() {
     }
 
     isFetching = true;
+    hasFetched = true;
     saveConfig();
-    showLoading(true);
+    renderSkeleton();
 
     try {
         let url = `${API_BASE}?apikey=${encodeURIComponent(apiKey)}&namespace=${encodeURIComponent(namespace)}`;
@@ -389,7 +418,6 @@ async function fetchEmails() {
         showSnackbar(error.message || t('networkError'), 'error');
         renderError(error.message);
     } finally {
-        showLoading(false);
         isFetching = false;
     }
 }
@@ -421,12 +449,18 @@ function renderError(message) {
 // Render email list
 function renderEmailList() {
     if (emails.length === 0) {
+        const msgKey = hasFetched ? 'noEmailsFound' : 'emptyState';
+        const hintKey = hasFetched ? 'noEmailsHint' : 'emptyHint';
         emailListEl.innerHTML = `
             <div class="empty-state">
-                <svg viewBox="0 0 24 24" class="empty-icon">
-                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                </svg>
-                <p>${t('noEmailsFound')}</p>
+                <div class="empty-state-illustration">
+                    <div class="empty-envelope"></div>
+                    <div class="empty-star"></div>
+                    <div class="empty-star"></div>
+                    <div class="empty-star"></div>
+                </div>
+                <p>${t(msgKey)}</p>
+                <span class="empty-hint">${t(hintKey)}</span>
             </div>
         `;
         return;
@@ -437,8 +471,10 @@ function renderEmailList() {
         const preview = getPreview(email);
         const isActive = activeEmailIndex === index;
 
+        const delay = Math.min(index * 0.05, 0.5);
+
         return `
-            <div class="email-item ${isActive ? 'active' : ''}" data-index="${index}">
+            <div class="email-item ${isActive ? 'active' : ''}" data-index="${index}" style="animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1) ${delay}s both;">
                 <div class="email-summary" onclick="toggleEmail(${index})">
                     <div class="avatar">${escapeHtml(getAvatarLetter(email.from))}</div>
                     <div class="content-col">

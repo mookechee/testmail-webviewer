@@ -17,10 +17,13 @@
     <link rel="canonical" href="https://mookechee.github.io/testmail-webviewer/">
     <meta name="twitter:title" content="Testmail WebViewer">
     <meta name="twitter:description" content="A Material Design web application for visualizing emails from Testmail.app">
-    <meta name="theme-color" content="#3F51B5" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#7C3AED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -128,10 +131,14 @@
         <main class="email-list-container">
             <div id="emailList" class="email-list">
                 <div class="empty-state">
-                    <svg viewBox="0 0 24 24" class="empty-icon">
-                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                    </svg>
+                    <div class="empty-state-illustration">
+                        <div class="empty-envelope"></div>
+                        <div class="empty-star"></div>
+                        <div class="empty-star"></div>
+                        <div class="empty-star"></div>
+                    </div>
                     <p data-i18n="emptyState">请先配置 API 并获取邮件</p>
+                    <span class="empty-hint" data-i18n="emptyHint">在上方填写 API Key 和 Namespace 后点击获取</span>
                 </div>
             </div>
         </main>
