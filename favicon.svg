@@ -4,7 +4,7 @@
       <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000000" flood-opacity="0.3"/>
     </filter>
   </defs>
-  <circle cx="16" cy="16" r="16" fill="#3F51B5"/>
+  <circle cx="16" cy="16" r="16" fill="#6366F1"/>
   <g transform="translate(4, 4)" filter="url(#shadow)">
      <svg viewBox="0 0 24 24" width="24" height="24">
         <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="#FFFFFF"/>

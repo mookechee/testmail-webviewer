@@ -438,7 +438,7 @@ function renderEmailList() {
         const isActive = activeEmailIndex === index;
 
         return `
-            <div class="email-item ${isActive ? 'active' : ''}" data-index="${index}">
+            <div class="email-item ${isActive ? 'active' : ''}" data-index="${index}" style="animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1) ${index * 0.05}s both;">
                 <div class="email-summary" onclick="toggleEmail(${index})">
                     <div class="avatar">${escapeHtml(getAvatarLetter(email.from))}</div>
                     <div class="content-col">
