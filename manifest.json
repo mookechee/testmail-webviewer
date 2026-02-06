@@ -4,8 +4,8 @@
   "description": "A Material Design web application for visualizing emails from Testmail.app",
   "start_url": "/testmail-webviewer/",
   "display": "standalone",
-  "background_color": "#3F51B5",
-  "theme_color": "#3F51B5",
+  "background_color": "#EDEBF4",
+  "theme_color": "#6366F1",
   "orientation": "portrait-primary",
   "icons": [
     {
