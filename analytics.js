@@ -3,12 +3,15 @@
  * Custom event tracking for Testmail WebViewer
  */
 
-const POSTHOG_API_KEY = 'YOUR_POSTHOG_API_KEY';
+const POSTHOG_API_KEY = 'YOUR_POSTHOG_API_KEY'; // TODO: Replace with actual key (Task 5)
 const POSTHOG_HOST = '/ingest';
+
+let analyticsInitialized = false;
 
 // Initialize PostHog
 function initAnalytics() {
-    if (typeof posthog === 'undefined') return;
+    if (analyticsInitialized || typeof posthog === 'undefined') return;
+    analyticsInitialized = true;
 
     posthog.init(POSTHOG_API_KEY, {
         api_host: POSTHOG_HOST,
