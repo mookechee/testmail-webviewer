@@ -144,6 +144,7 @@ let hasFetched = false; // Track if user has fetched at least once
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     loadConfig();
+    initAnalytics();
     applyTheme();
     updateLanguageUI();
     bindEvents();
@@ -240,7 +241,9 @@ function updateLanguageUI() {
 
 // Toggle Language
 function toggleLanguage() {
+    const prevLang = currentLang;
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    trackLanguageChanged(prevLang, currentLang);
     saveConfig();
     updateLanguageUI();
 }
@@ -281,6 +284,7 @@ function toggleThemeDropdown() {
 // Select theme
 function selectTheme(themeName) {
     currentTheme = themeName;
+    trackThemeChanged(themeName);
     applyTheme();
     saveConfig();
     themeDropdown.classList.remove('open');
@@ -466,6 +470,7 @@ async function fetchEmails() {
 
         // Render email list
         renderEmailList();
+        trackEmailFetched(emails.length, !!tag);
 
         if (emails.length === 0) {
             showSnackbar(t('noEmailsFound'), 'default');
@@ -475,6 +480,7 @@ async function fetchEmails() {
 
     } catch (error) {
         console.error('Fetch error:', error);
+        trackEmailFetchFailed(error.message || 'unknown');
         showSnackbar(error.message || t('networkError'), 'error');
         renderError(error.message);
     } finally {
@@ -670,6 +676,7 @@ function toggleEmail(index) {
         // Collapse
         item.classList.remove('active');
         detailContainer.style.maxHeight = '0';
+        trackEmailCollapsed(index);
         activeEmailIndex = null;
     } else {
         // Collapse previous
@@ -685,6 +692,8 @@ function toggleEmail(index) {
 
         // Load iframe content
         const email = emails[index];
+        trackEmailExpanded(index, !!email.html, !!(email.attachments && email.attachments.length));
+
         if (email.html) {
             setTimeout(() => {
                 const iframe = document.getElementById(`iframe-${index}`);
@@ -720,6 +729,7 @@ function switchTab(index, tab) {
 
     if (htmlView) htmlView.style.display = tab === 'html' ? 'block' : 'none';
     if (textView) textView.style.display = tab === 'text' ? 'block' : 'none';
+    trackTabSwitched(tab);
 }
 
 // Copy email content to clipboard
@@ -738,6 +748,7 @@ async function copyEmailContent(index, type) {
 
     try {
         await navigator.clipboard.writeText(content);
+        trackContentCopied(type);
         showSnackbar(t('copied'), 'success');
     } catch (e) {
         // Fallback for older browsers
@@ -749,6 +760,7 @@ async function copyEmailContent(index, type) {
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
+        trackContentCopied(type);
         showSnackbar(t('copied'), 'success');
     }
 }
