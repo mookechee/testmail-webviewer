@@ -3,10 +3,10 @@ export async function onRequest(context) {
     const pathname = url.pathname.replace(/^\/ingest/, '');
     const search = url.search;
 
-    const posthogUrl = `https://us.posthog.com${pathname}${search}`;
+    const posthogUrl = `https://eu.i.posthog.com${pathname}${search}`;
 
     const headers = new Headers(context.request.headers);
-    headers.set('host', 'us.posthog.com');
+    headers.set('host', 'eu.i.posthog.com');
 
     const response = await fetch(posthogUrl, {
         method: context.request.method,
